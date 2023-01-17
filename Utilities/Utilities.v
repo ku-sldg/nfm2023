@@ -35,3 +35,9 @@ Ltac dep_induct E :=
       try match goal with
             | [ H : _ = E |- _ ] => try rewrite <- H in *; clear H
           end.
+
+
+(* Some general tactics *)
+
+Ltac right_dest_contr H := right; unfold not; intros H; destruct H; contradiction.
+Ltac right_dest_inverts := right; unfold not; intros H; inverts H.
