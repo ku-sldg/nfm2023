@@ -534,6 +534,7 @@ Proof.
   prove_exec'; cbv; auto. intros. split; auto. 
 Qed.
 
+(* A few decidability proofs... useful later*)
 Theorem string_dec: forall (s s':string), {s=s'}+{s<>s'}.
 Proof.
   intros s s'.
@@ -546,12 +547,9 @@ Proof.
   apply string_dec.
 Defined.
 
-Check ASP_dec.
-
 (** A proof that [tar_Policy] is decidable.  If we can show all policies are
 * decidable, life is good.  This is a start.
 *)
-
 Theorem tar_Policy_dec: forall (asp:ASP)(plc:Plc), {(tar_Policy asp plc)}+{~(tar_Policy asp plc)}.
 Proof.
   intros asp.
@@ -620,7 +618,7 @@ Defined.
 
 Ltac map_update_eq := unfold e_P2; apply e_update_reduce; unfold not; intros Hneg; rewrite Hneg in *; contradiction.
 
-(* With Policy, we can now prove the system is sound. *)
+(* With Policy, we can now prove the system (e_P2) is sound. *)
 Theorem sound_local_policies: (forall p0 a0, {(checkASPPolicy p0 e_P2 a0)} + {~(checkASPPolicy p0 e_P2 a0)}).
 Proof.
   intros p a.
@@ -642,44 +640,7 @@ Proof.
    unfold not. intros Hneg. rewrite <- H in *. rewrite <- H0 in *. rewrite H1 in *. auto.
 Defined.
 
-Theorem sound_local_policies': (forall p0 a0, {(checkASPPolicy p0 e_P2 a0)} + {~(checkASPPolicy p0 e_P2 a0)}).
-Proof.
-  intros p a.
-  assert ({(p="P0"%string)}+{(p<>"P0"%string)}). apply plc_dec.
-  assert ({(p="P1"%string)}+{(p<>"P1"%string)}). apply plc_dec.
-  assert ({(p="P2"%string)}+{(p<>"P2"%string)}). apply plc_dec.
-  destruct H, H0, H1.
-  rewrite e in e1. inversion e1.
-  rewrite e in e1. inversion e1.
-  rewrite e in e1. inversion e1.
-  rewrite e.
-  unfold checkASPPolicy.
-  simpl. apply P0_Policy_dec.
-  rewrite e in e1. inversion e1.
-  rewrite e.
-  unfold checkASPPolicy.
-  simpl. apply P1_Policy_dec.
-  rewrite e.
-  unfold checkASPPolicy.
-  simpl. apply P2_Policy_dec.
-  right. unfold checkASPPolicy.
-  assert (e_P2 p = e_P1 p).
-  unfold e_P2.
-  apply e_update_reduce. unfold not. intros Hneg. rewrite Hneg in *. contradiction.
-  assert (e_P1 p = e_P0 p).
-  unfold e_P2.
-  apply e_update_reduce. unfold not. intros Hneg. rewrite Hneg in *. contradiction.
-  assert (e_P0 p = e_empty p).
-  unfold e_P2.
-  apply e_update_reduce. unfold not. intros Hneg. rewrite Hneg in *. contradiction.
-  unfold not. intros Hneg.
-  rewrite <- H in *.
-  rewrite <- H0 in *.
-  rewrite H1 in *.
-  simpl in Hneg.
-  assumption.
-Qed.
-
+(* Proof that the system described by e_P2 is sound. *)
 Theorem sound_system_dec: forall t p, {sound t p e_P2}+{~(sound t p e_P2)}.
 Proof.
   intros t p.
